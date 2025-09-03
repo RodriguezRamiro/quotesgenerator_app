@@ -1,144 +1,220 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quotes and Rhymes Generator</title>
-    <style>
-        body{
-            font-family: Arial, sans-serif;
-            background: #f4f4f9;
-            display: flex;
-            align-items: center;
-            padding: 2rem;
-        }
-        h1{
-            color: #333;
-        }
-        #quote-box {
-            background: #fff;
-            padding: 1rem 2rem;
-            margin: 1rem 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            max-width: 600px;
-            text-align: center;
-        }
-        button {
-            margin: 0.5rem;
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 5px;
-            background: #4CAF50;
-            color: white;
-            cursor: pointer;
-        }
-        form {
-            margin-top: 2rem;
-            background: #fff;
-            padding: 1rem 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            max-width: 600px;
-            width: 100%;
-        }
-        input, textarea {
-            width: 100%;
-            margin: 0.5rem 0;
-            padding: 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quotes and Rhymes Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    h1 { color: #333; }
+    #quote-box {
+      background: #fff;
+      padding: 1rem 2rem;
+      margin: 1rem 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      max-width: 600px;
+      text-align: center;
+    }
+    button {
+      margin: 0.5rem;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+      background: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+    form {
+      margin-top: 2rem;
+      background: #fff;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      max-width: 600px;
+      width: 100%;
+    }
+    input, textarea {
+      width: 100%;
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    #all-quotes {
+      margin-top: 2rem;
+      width: 100%;
+      max-width: 600px;
+    }
+    .quote-item {
+      background: #fff;
+      padding: 0.75rem 1rem;
+      margin: 0.5rem 0;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 
-        #all-quotes {
-            margin-top: 2rem;
-            width: 100%;
-            max-width: 600px;
-        }
-        .quote-item {
-            background: #fff;
-            padding: 0.75rem 1rem;
-            margin: 0.5rem 0;
-            border-radius: 6px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3)
-        }
-    </style>
+      button.delete-btn {
+  background: #e53935;
+}
+
+button.delete-btn:hover {
+  background: #c62828;
+}
+
+textarea, input {
+  margin: 0.25rem 0;
+}
+
+button.delete-btn {
+  background: #e53935;
+}
+button.delete-btn:hover {
+  background: #c62828;
+}
+
+
+    }
+  </style>
 </head>
 <body>
-    <h1>Quote and Rhymes Generator</h1>
+  <h1>Quote and Rhymes Generator</h1>
 
-    <!-- Quotes display area-->
-    <div id="quote-box">
-        <p id="quote-text">Click a button to load a quote!</p>
-        <p id="quote-author"></p>
-    </div>
-    <button onclick="getRandomQuote()">Random Quote (local)</button>
-    <button onclick="getExternalQuote()">Random Quote (external)</button>
+  <!-- Quotes display area -->
+  <div id="quote-box">
+    <p id="quote-text">Click a button to load a quote!</p>
+    <p id="quote-author"></p>
+  </div>
 
-    <!-- Add quote from -->
-    <form id="quote-form">
-        <h2>Add Your Qoute</h2>
-        <textarea id="new-quote-text" placeholder="Enter your quote here" required></textarea>
-        <input id="new-quote-author" placeholder="Quote Author" required />
-        <button type="submit"> Submit Quote</button>
-    </form>
+  <button onclick="getRandomQuote()">Get Random Quote (local)</button>
+  <button onclick="getExternalQuote()">Fetch Quote (external)</button>
+  <button id="saveBtn" onclick="saveExternalQuote()" disabled>Save External Quote</button>
 
-    <!-- View all Quotes-->
-    <h2>All local Quotes</h2>
-    <div id="all-quotes"></div>
+  <!-- Add quote form -->
+  <form id="quote-form">
+    <h2>Add Your Quote</h2>
+    <textarea id="new-quote-text" placeholder="Enter your quote here" required></textarea>
+    <input id="new-quote-author" placeholder="Quote Author" required />
+    <button type="submit">Submit Quote</button>
+  </form>
 
-    <script>
-     async function getRandomQuote() {
-        const res = await fetch('/api/quotes/random');
-        const data = await res.json();
-        document.getElementById('quote-text').innerText = `"${data.text}"`;
-        document.getElementById('quote-author').innerText = `- ${data.author}`;
+  <!-- View all Quotes -->
+  <h2>All Local Quotes</h2>
+  <div id="all-quotes"></div>
+
+  <script>
+    let lastExternalQuote = null;
+
+    async function getRandomQuote() {
+      const res = await fetch('/api/quotes/random');
+      const data = await res.json();
+      document.getElementById('quote-text').innerText = `"${data.text}"`;
+      document.getElementById('quote-author').innerText = `- ${data.author}`;
+      document.getElementById('saveBtn').disabled = true;
     }
 
     async function getExternalQuote() {
-        const res = await fetch('/api/quotes/external');
+      const res = await fetch('/api/quotes/external');
+      const data = await res.json();
+      lastExternalQuote = data; // store for saving later
+      document.getElementById('quote-text').innerText = `"${data.text}"`;
+      document.getElementById('quote-author').innerText = `- ${data.author}`;
+      document.getElementById('saveBtn').disabled = false; // enable save
+    }
+
+    async function saveExternalQuote() {
+      if (!lastExternalQuote) return;
+      const res = await fetch('/api/quotes/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(lastExternalQuote)
+      });
+      const result = await res.json();
+      alert(result.message || "Saved!");
+      document.getElementById('saveBtn').disabled = true; // disable save button
+      loadAllQuotes(); // refresh quotes list
+    }
+
+    async function deleteQuote(id) {
+        if (!confirm("Do you want to delete this Quote?")) return;
+
+        const res = await fetch(`/api/quotes/${id}`, { method: 'DELETE' });
         const data = await res.json();
-        document.getElementById('quote-text').innerText = `"${data.text}"`;
-        document.getElementById('quote-author').innerText = `- ${data.author}`;
+        alert(data.message || data.error);
+        loadAllQuotes(); // refresh afteter deletion
     }
 
     async function loadAllQuotes() {
-        const res = await fetch('/api/quotes');
-        const data = await res.json();
-        const container = document.getElementById('all-quotes');
-        container.innerHTML = '';
-        data.forEach(q => {
-            const div = document.createElement('div');
-            div.className = 'quote-item';
-            div.innerText = `"{q.text}" - ${q.author}`;
-            container.appendChild(div);
-        });
+      const res = await fetch('/api/quotes');
+      const data = await res.json();
+      const container = document.getElementById('all-quotes');
+      container.innerHTML = data.map(q => `
+            <div class="quote-item">
+                <p>"${q.text}" — ${q.author}</p>
+                <button onclick="editQuote('${q.text}', '${q.author}')">Edit</button>
+                <button class="delete-btn" onclick="deleteQuote(${q.id})">Delete</button>
+            </div>
+        `).join("");
     }
 
-    // Handle form submission
-    document.getElementById('quote-form').addEventLIstener('submit', async (e) => {
-        e.preventDefault();
-        const text = document.getElementById('new-quote-text').value;
-        const author = documetn.getElementById('new-quote-author').value;
+    // Function to edit a quote
+    function editQuote(id, text, author) {
+        const container = document.getElementById(`quote-${id}`);
+        contaiener.innerHTML = `
+            <textarea id="edit-text-${id}">${text}</textarea>
+            <input id="edit-author-${id}" value="${author}" />
+            <button onclick="saveEdit(${id})">Save</button>
+            <button onclick="loadAllQuotes()">Cancel</button>
+            `;
+    }
 
-        const res = await fetch('/api/quotes', {
-            method: 'POST',
-            headers: { 'Contetnt-Type': 'aplication/json' },
-            body: JSON.stringify({ text, author})
+    async funciton saveEdit(id) {
+        const text = document.getElementById(`edit-text-${id}`).value;
+        const author = document.getElementById(`edit-author-${id}`).value;
+
+        const res = await fetch(`/api/quotes/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, author })
         });
 
         if (res.ok) {
-            alert('Quote added successfully!');
-            document.getElementById('quote-form').rest();
+            alert('Quote updated successfully!');
             loadAllQuotes(); // Refresh the list of quotes
         } else {
-            alert('Failed to add quote.');
+            alert('Failed to update quote.');
         }
+    }
+
+    // Handle form submission
+    document.getElementById('quote-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = document.getElementById('new-quote-text').value;
+      const author = document.getElementById('new-quote-author').value;
+
+      const res = await fetch('/api/quotes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, author })
+      });
+
+      if (res.ok) {
+        alert('Quote added successfully!');
+        document.getElementById('quote-form').reset();
+        loadAllQuotes(); // Refresh the list of quotes
+      } else {
+        alert('Failed to add quote.');
+      }
     });
 
     // Initial load of all quotes
     loadAllQuotes();
-
-</script>
+  </script>
 </body>
 </html>
