@@ -59,13 +59,15 @@ def update_quote(quote_id):
     data = request.json
     quote = next((q for q in quotes if q["id"] == quote_id), None)
     if not quote:
-        return jsonify({"error": f"Quote wih id {quote_id} not found"}),
+        return jsonify({"error": f"Quote with id {quote_id} not found"}), 404
 
     quote["text"] = data.get("text", quote["text"])
     quote["author"] = data.get("author", quote["author"])
 
-    return jsonify({"message": f"Quote with id {quote_id} updated successfully", "quote": quote}), 200
-
+    return jsonify({
+        "message": f"Quote with id {quote_id} updated successfully",
+        "quote": quote
+    }), 200
 
 
 @app.route('/api/quotes/external', methods=['GET'])
